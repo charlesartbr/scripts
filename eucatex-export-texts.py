@@ -35,6 +35,25 @@ if os.path.isdir('eucatex-export-texts') == False:
 f = codecs.open('eucatex-export-texts/' + strip_html(category['name']) + '.html', 'w+', "utf-8")
 f.write('<html><body>')
 
+
+# escreve os dados do produto
+def print_product(product, dept):
+
+    print('Produto:', strip_html(product['name']))
+    f.write('<h' + str(dept + 1) + '>' + product['name'] + '</h' + str(dept + 1) + '>')
+
+    with urllib.request.urlopen(apiEndpoint + 'product?language=pt&url=' + product['url']) as url:
+        product = json.loads(url.read().decode())
+        
+        if 'text' in product and product['text']:
+            f.write(product['text'])
+
+        if 'information' in product and product['information']:
+            for information in product['information']:
+                f.write('<h' + str(dept + 2) + '>' + information['title'] + '</h' + str(dept + 2) + '>')
+                f.write(information['description'])
+
+
 # iterage nas categorias recursivamente exibindo os produtos
 def print_products(categories, dept = 0):
 
@@ -43,7 +62,6 @@ def print_products(categories, dept = 0):
     for category in categories:
 
         f.write('<h' + str(dept) + '>' + category['name'] + '</h' + str(dept) + '>')
-
         print('\nCategoria:', strip_html(category['name']))
 
         # recursivo nas subcategorias
@@ -53,20 +71,19 @@ def print_products(categories, dept = 0):
         # lista os produtos
         if 'products' in category:
             for product in category['products']:
-                print('Produto:', strip_html(product['name']))
-                f.write('<h' + str(dept + 1) + '>' + product['name'] + '</h' + str(dept + 1) + '>')
+                print_product(product, dept)
 
 
 # retorna a lista de produtos
 with urllib.request.urlopen(apiEndpoint + 'category?language=pt&products=true&categoryId=' + str(id)) as url:
-
     data = json.loads(url.read().decode())
-
     print_products(data)
+
 
 # fecha o arquivo
 f.write('</body></html>')
 f.close()
+
 
 # sai do programa
 sys.exit()
