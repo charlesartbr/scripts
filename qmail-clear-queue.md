@@ -19,6 +19,13 @@ find /var/qmail/queue/intd -type f -exec rm {} \;
 find /var/qmail/queue/todo -type f -exec rm {} \;
 find /var/qmail/queue/remote -type f -exec rm {} \;
 ```
+or 
+
+## to delete only e-mails in queue with some text
+```
+grep -H -R /var/qmail/queue -e 'some-text' | cut -d: -f1 | xargs rm
+```
+
 
 ## start the qmail service.
 ```
