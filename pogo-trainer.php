@@ -1,12 +1,11 @@
-<html>
-<body>
-<pre>
 <?php
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
 ini_set('display_errors', 1);
 
 $cookie = '';
+
+header('Content-Type: text/plain');
 
 function getCookie()
 {
@@ -23,6 +22,7 @@ function getCookie()
 	preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $r, $matches);
 	
 	$cookies = array();
+
 	foreach($matches[1] as $item) {
 		$cookies[] = $item;
 	}
@@ -35,8 +35,6 @@ function getCookie()
 function login($login)
 {
 	global $cookie;
-
-	print_r([ 'loginEmail' => $login[0], 'loginPassword' => $login[1], '$cookie' => $cookie ]);
 
 	$curl = curl_init();
 
@@ -52,7 +50,8 @@ function login($login)
 	  CURLOPT_POSTFIELDS => "loginEmail={$login[0]}&loginPassword={$login[1]}&loginRedirect=",
 	  CURLOPT_HTTPHEADER => array(
 		"Content-Type: application/x-www-form-urlencoded",
-		"Cookie: $cookie"
+		"Cookie: $cookie",
+		"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0",
 	  ),
 	));
 
@@ -116,9 +115,9 @@ function updateLocation()
 
 try
 {
-	$logins = [
-		['username', 'password'],
-	];
+	$logins = array(
+		array('username', 'password')
+	);
 	
 	$h = date('h');
 	$x = $h % 3;
@@ -127,7 +126,7 @@ try
 	login($logins[$x]);
 	updateLocation();
 	
-	$fp = fopen('pogo-trainer.txt', 'a');
+	$fp = fopen(dirname(__FILE__) . '/pogo-trainer.txt', 'a');
 	fwrite($fp, '[' . date('Y-m-d H:i') . '] ' . $logins[$x][0] . "\n");  
 	fclose($fp);  
 }
@@ -137,6 +136,3 @@ catch(Exception $e)
 }
 
 ?>
-</pre>
-</body>
-</html>
