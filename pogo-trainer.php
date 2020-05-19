@@ -38,8 +38,11 @@ function login($login)
 
 	$curl = curl_init();
 
+	$lat = mt_rand(23.4, 23.6);
+	$lng = mt_rand(46.4, 46.7);	
+
 	curl_setopt_array($curl, array(
-	  CURLOPT_URL => "https://pogotrainer.club/login/run/",
+	  CURLOPT_URL => "https://pogotrainer.club/pokemon/updateLocation/",
 	  CURLOPT_RETURNTRANSFER => true,
 	  CURLOPT_ENCODING => "",
 	  CURLOPT_MAXREDIRS => 10,
@@ -47,11 +50,10 @@ function login($login)
 	  CURLOPT_FOLLOWLOCATION => true,
 	  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 	  CURLOPT_CUSTOMREQUEST => "POST",
-	  CURLOPT_POSTFIELDS => "loginEmail={$login[0]}&loginPassword={$login[1]}&loginRedirect=",
+	  CURLOPT_POSTFIELDS => "PDLat=-$lat&PDLng=-$lng",
 	  CURLOPT_HTTPHEADER => array(
 		"Content-Type: application/x-www-form-urlencoded",
-		"Cookie: $cookie",
-		"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0",
+		"Cookie: $cookie"
 	  ),
 	));
 
