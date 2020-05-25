@@ -38,11 +38,8 @@ function login($login)
 
 	$curl = curl_init();
 
-	$lat = mt_rand(23.4, 23.6);
-	$lng = mt_rand(46.4, 46.7);	
-
 	curl_setopt_array($curl, array(
-	  CURLOPT_URL => "https://pogotrainer.club/pokemon/updateLocation/",
+	  CURLOPT_URL => "https://pogotrainer.club/login/run/",
 	  CURLOPT_RETURNTRANSFER => true,
 	  CURLOPT_ENCODING => "",
 	  CURLOPT_MAXREDIRS => 10,
@@ -50,10 +47,11 @@ function login($login)
 	  CURLOPT_FOLLOWLOCATION => true,
 	  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 	  CURLOPT_CUSTOMREQUEST => "POST",
-	  CURLOPT_POSTFIELDS => "PDLat=-$lat&PDLng=-$lng",
+	  CURLOPT_POSTFIELDS => "loginEmail={$login[0]}&loginPassword={$login[1]}&loginRedirect=",
 	  CURLOPT_HTTPHEADER => array(
 		"Content-Type: application/x-www-form-urlencoded",
-		"Cookie: $cookie"
+		"Cookie: $cookie",
+		"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0",
 	  ),
 	));
 
@@ -75,7 +73,7 @@ function login($login)
 	echo "-------------------------------\n";
 }
 
-function updateLocation()
+function updateLocation($location)
 {
 	global $cookie;
 
@@ -90,7 +88,7 @@ function updateLocation()
 	  CURLOPT_FOLLOWLOCATION => true,
 	  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 	  CURLOPT_CUSTOMREQUEST => "POST",
-	  CURLOPT_POSTFIELDS => "PDLat=-23.590979&PDLng=-46.503712",
+	  CURLOPT_POSTFIELDS => "PDLat=$location[0]&PDLng=$location[1]",
 	  CURLOPT_HTTPHEADER => array(
 		"Content-Type: application/x-www-form-urlencoded",
 		"Cookie: $cookie"
@@ -115,21 +113,41 @@ function updateLocation()
 	echo '-------------------------------';
 }
 
+function random_float($min, $max) {
+    return round(((mt_rand() / mt_getrandmax()) * ($max - $min)) + $min, 7);
+}
+
 try
 {
 	$logins = array(
-		array('username', 'password')
+		array('', ''), // 0 
+		array('', ''), // 1
+		array('', ''), // 2
+		array('', ''), // 3
+		array('', ''), // 4
 	);
 	
-	$h = date('h');
-	$x = $h % 3;
+	$locations = array(
+		array(-random_float(0, 22.7), -random_float(42.1, 56.0)), // Brazil
+		array(random_float(32.8, 48.3), -random_float(80.1, 124.6)), // USA
+		array(random_float(46.4, 50.9), random_float(1.8, 30.5)), // Europe
+		array(random_float(24.5, 31.4), random_float(104.5, 118)), // China
+		array(-23.590979, -46.503712), // SP
+	);
 	
+	$h = date('g');
+	$x = $h % count($logins);
+
 	getCookie();
 	login($logins[$x]);
-	updateLocation();
+	updateLocation($locations[$x]);
+	
+	$log = '[' . date('Y-m-d H:i') . "] {$logins[$x][0]} ({$locations[$x][0]}, {$locations[$x][1]})\n";
+	
+	print("\n$log");
 	
 	$fp = fopen(dirname(__FILE__) . '/pogo-trainer.txt', 'a');
-	fwrite($fp, '[' . date('Y-m-d H:i') . '] ' . $logins[$x][0] . "\n");  
+	fwrite($fp, $log);
 	fclose($fp);  
 }
 catch(Exception $e)
