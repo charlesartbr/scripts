@@ -77,6 +77,12 @@ function updateLocation($location)
 {
 	global $cookie;
 
+	if (is_array($location[0]))
+	{
+		$x = mt_rand(0, count($location) - 1);
+		$location = $location[$x];
+	}
+
 	$curl = curl_init();
 
 	curl_setopt_array($curl, array(
@@ -128,11 +134,16 @@ try
 	);
 	
 	$locations = array(
-		array(-random_float(0, 22.7), -random_float(42.1, 56.0)), // Brazil
-		array(random_float(32.8, 48.3), -random_float(80.1, 124.6)), // USA
-		array(random_float(46.4, 50.9), random_float(1.8, 30.5)), // Europe
-		array(random_float(24.5, 31.4), random_float(104.5, 118)), // China
-		array(-23.590979, -46.503712), // SP
+		// Brazil (São Paulo, Rio de Janeiro, Recife, Curitiba, Manaus)
+		array(array(-23.5882183,-46.6565463), array(-22.9687034,-43.1978738), array(-8.1157493,-34.9093704), array(-25.4350492,-49.244312), array(-3.0444884,-60.0371439)), 
+		// USA (New York, Chicago, Miami, Los Angeles, Seattle)
+		array(array(40.7482156,-73.9872887), array(41.8395421,-87.7217484), array(25.7990002,-80.1322639), array(33.9886552,-118.3008758), array(47.6206961,-122.3509972)), 
+		// Europe (Paris, Bruxelas, Berlim, Londres, Madri)
+		array(array(48.8667993,2.3209658), array(50.8510756,4.3578794), array(52.5069704,13.2846503), array(51.5305873,-0.1740457), array(40.4149204,-3.7117179)), 
+		// Asia (Pequim, Xangai, Hong Kong, Tokio, Kuala Lumpur)
+		array(array(39.9390731,116.1172792), array(31.2246325,121.1965699), array(22.3065456,114.1565307), array(35.6684415,139.6007845), array(3.1631903,101.7063753)), 
+		// SP
+		array(-23.590979, -46.503712), 
 	);
 	
 	$h = date('g');
