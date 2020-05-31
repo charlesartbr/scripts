@@ -11,15 +11,39 @@ function getCookie()
 {
 	global $cookie;
 
-	$s = curl_init();
+	$curl = curl_init();
 	
-	curl_setopt($s, CURLOPT_URL, 'https://pogotrainer.club/');
-	curl_setopt($s, CURLOPT_HEADER, 1);
-	curl_setopt($s, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt_array($curl, array(
+	  CURLOPT_URL => 'https://pogotrainer.club/',
+	  CURLOPT_RETURNTRANSFER => true,
+	  CURLOPT_ENCODING => "",
+	  CURLOPT_HEADER => 1,
+	  CURLOPT_MAXREDIRS => 10,
+	  CURLOPT_TIMEOUT => 0,
+	  CURLOPT_FOLLOWLOCATION => true,
+	  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+	  CURLOPT_CUSTOMREQUEST => "POST",
+	  CURLOPT_HTTPHEADER => array(
+		"Content-Type: application/x-www-form-urlencoded",
+		"Cookie: $cookie",
+		"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0",
+	  )
+	));
+	  
+	$response = curl_exec($curl); 
 	
-	$r = curl_exec($s); 
-	
-	preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $r, $matches);
+	if(!curl_errno($curl))
+	{
+	  $info = curl_getinfo($curl);
+	  
+	  print_r($info);
+	} 
+	else 
+	{
+	  echo 'Curl error: ' . curl_error($curl);
+	}
+
+	preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $response, $matches);
 	
 	$cookies = array();
 
@@ -27,7 +51,7 @@ function getCookie()
 		$cookies[] = $item;
 	}
 	
-	curl_close($s);
+	curl_close($curl);
 	
 	$cookie = implode('; ', $cookies);
 }
@@ -117,10 +141,8 @@ function updateLocation($location)
 	curl_close($curl);
 	
 	echo '-------------------------------';
-}
-
-function random_float($min, $max) {
-    return round(((mt_rand() / mt_getrandmax()) * ($max - $min)) + $min, 7);
+	
+	return $location;
 }
 
 try
@@ -150,10 +172,18 @@ try
 	$x = $h % count($logins);
 
 	getCookie();
-	login($logins[$x]);
-	updateLocation($locations[$x]);
 	
-	$log = '[' . date('Y-m-d H:i') . "] {$logins[$x][0]} ({$locations[$x][0]}, {$locations[$x][1]})\n";
+	if (empty($cookie))
+	{
+		$log = '[' . date('Y-m-d H:i') . "] {$logins[$x][0]} - NÃO FOI POSSIVEL PEGAR O COOKIE\n";
+	}
+	else
+	{
+		login($logins[$x]);
+		$location = updateLocation($locations[$x]);
+	
+		$log = '[' . date('Y-m-d H:i') . "] {$logins[$x][0]} - https://www.latlong.net/c/?lat={$location[0]}&long={$location[1]}\n";
+	}
 	
 	print("\n$log");
 	
