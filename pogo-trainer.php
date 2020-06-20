@@ -156,33 +156,48 @@ try
 	);
 	
 	$locations = array(
-		// Brazil (São Paulo, Rio de Janeiro, Recife, Curitiba, Manaus)
+		// 0: Brazil (São Paulo, Rio de Janeiro, Recife, Curitiba, Manaus)
 		array(array(-23.5882183,-46.6565463), array(-22.9687034,-43.1978738), array(-8.1157493,-34.9093704), array(-25.4350492,-49.244312), array(-3.0444884,-60.0371439)), 
-		// USA (New York, Chicago, Miami, Los Angeles, Seattle)
+		// 1: USA (New York, Chicago, Miami, Los Angeles, Seattle)
 		array(array(40.7482156,-73.9872887), array(41.8395421,-87.7217484), array(25.7990002,-80.1322639), array(33.9886552,-118.3008758), array(47.6206961,-122.3509972)), 
-		// Europe (Paris, Bruxelas, Berlim, Londres, Madri)
+		// 2: Europe (Paris, Bruxelas, Berlim, Londres, Madri)
 		array(array(48.8667993,2.3209658), array(50.8510756,4.3578794), array(52.5069704,13.2846503), array(51.5305873,-0.1740457), array(40.4149204,-3.7117179)), 
-		// Asia (Pequim, Xangai, Hong Kong, Tokio, Kuala Lumpur)
-		array(array(39.9390731,116.1172792), array(31.2246325,121.1965699), array(22.3065456,114.1565307), array(35.6684415,139.6007845), array(3.1631903,101.7063753)), 
-		// SP
+		// 3: Asia (Seul, Hong Kong, Tokio, Kuala Lumpur)
+		array(array(37.552048,126.9744137), array(31.2246325,121.1965699), array(22.3065456,114.1565307), array(35.6684415,139.6007845), array(3.1631903,101.7063753)), 
+		// 4: SP
 		array(-23.590979, -46.503712), 
 	);
 	
-	$h = date('g');
-	$x = $h % count($logins);
-
-	getCookie();
+	$hours = array(
+		0 => 0, 1 => 1, 2 => 2, 3 => 3, 4 => 4,
+		5 => 0, 6 => 1, 7 => 2, 8 => 3, 9 => 4,
+		9 => null, 10 => null, 11 => null, 12 => null, 13 => 4,
+		14 => 0, 15 => 1, 16 => 2, 17 => 3, 18 => 4,		
+		19 => null, 20 => null, 21 => null, 22 => null, 23 => 4,
+	);
 	
-	if (empty($cookie))
+	$h = date('G');
+	$x = $hours[$h];
+	
+	if ($x === null)
 	{
-		$log = '[' . date('Y-m-d H:i') . "] {$logins[$x][0]} - NÃO FOI POSSIVEL PEGAR O COOKIE\n";
+		$log = '[' . date('Y-m-d H:i') . "] nenhum login (h=$h, x=$x)";
 	}
 	else
 	{
-		login($logins[$x]);
-		$location = updateLocation($locations[$x]);
-	
-		$log = '[' . date('Y-m-d H:i') . "] {$logins[$x][0]} - https://www.latlong.net/c/?lat={$location[0]}&long={$location[1]}\n";
+		getCookie();
+		
+		if (empty($cookie))
+		{
+			$log = '[' . date('Y-m-d H:i') . "] {$logins[$x][0]} - NÃO FOI POSSIVEL PEGAR O COOKIE\n";
+		}
+		else
+		{
+			login($logins[$x]);
+			$location = updateLocation($locations[$x]);
+		
+			$log = '[' . date('Y-m-d H:i') . "] {$logins[$x][0]} - https://www.latlong.net/c/?lat={$location[0]}&long={$location[1]}\n";
+		}
 	}
 	
 	print("\n$log");
@@ -194,6 +209,11 @@ try
 catch(Exception $e)
 {
 	var_dump($e);
+	
+	$fp = fopen(dirname(__FILE__) . '/pogo-trainer.error.log', 'a');
+	fwrite($fp, '[' . date('Y-m-d H:i') . ']');
+	fwrite($fp, print_r($e, true));
+	fclose($fp);  
 }
 
 ?>
