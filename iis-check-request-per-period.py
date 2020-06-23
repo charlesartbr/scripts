@@ -17,5 +17,5 @@ for file in glob.glob('*/*2006*', recursive = True):
 
     f.close()
 
-    if quatro > 1000:
+    if r > 1000:
         print(file + ": total=" + str(total) + ' - r=' + str(r) + ' %=' + ("%.2f" % (r / total * 100)))
